@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Downloader</title>
+  <script>
+    function startDownload() {
+      document.getElementById('progress-bar').style.display = 'block';
+      pollProgress();
+    }
+
+    function pollProgress() {
+      fetch('/progress')
+        .then(res => res.json())
+        .then(data => {
+          const bar = document.getElementById('bar');
+          const text = document.getElementById('status');
+          bar.style.width = data.percentage + "%";
+          text.innerText = data.status.toUpperCase() + ": " + data.percentage + "%";
+
+          if (data.status !== "finished") {
+            setTimeout(pollProgress, 1000);
+          }
+        });
+    }
+  </script>
+  <style>
+    .progress-container {
+      width: 100%;
+      background: #ccc;
+      margin-top: 20px;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 30px;
+      background: #4caf50;
+    }
+
+    #status {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Download Tool</h2>
+  <form action="/download" method="post" onsubmit="startDownload()">
+    <input type="text" name="url" placeholder="YouTube URL" required><br>
+    <select name="type">
+      <option value="video">Video</option>
+      <option value="audio">Audio</option>
+    </select><br>
+    <button type="submit">Download</button>
+  </form>
+
+  <div id="progress-bar" class="progress-container" style="display:none;">
+    <div id="bar" class="progress-bar"></div>
+    <div id="status">Waiting...</div>
+  </div>
+</body>
+</html>
